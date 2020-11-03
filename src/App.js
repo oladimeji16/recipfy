@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Recipe from "./Recipe";
 
 import "./App.css"
+import Axios from 'axios';
 
 
 const App = () => {
@@ -10,21 +11,22 @@ const App = () => {
   const API_KEY = '9e3b90ec07e45c687a01f209c6ec110c'
 
 
-  const [recipes, setRecipes] = useState([])
+  const [recipes, setRecipes] = useState()
   const [search, setSearch] = useState('')
   const [query, setQuery] = useState('chicken')
 
   useEffect(() => {
+    const getRecipes = async () => {
+      Axios.get(`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${API_KEY}`)
+      .then(res => setRecipes(res.data.hits))
+      .catch(err => console.log(err))      
+    }
     getRecipes()
   }, [query])
 
-  const getRecipes = async () => {
-    const res = await fetch(`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${API_KEY}`)
-    const data = res.json()
-    setRecipes(data.hits)
-  }
 
-  const updateSearch = e => setSearch(e.target.value)
+
+  const updateSearch = e => { setSearch(e.target.value) }
 
   const getSearch = e => {
     e.preventDefault()
@@ -43,13 +45,30 @@ const App = () => {
         </button>
       </form>
       <div className="recipes">
-      {recipes.map(recipe => (
-        <Recipe title={recipe.recipe.label}
-        calories={recipe.recipe.calories}
-        image={recipe.recipe.image}
-        ingre={recipe.recipe.ingredients}        
-        key={recipe.recipe.label} />
-      ))}
+
+        {
+          recipes ? recipes.map((recipe) => (
+            <Recipe
+            title={recipe.recipe.label}
+            calories={recipe.recipe.calories}
+            image={recipe.recipe.image}
+            ingres={recipe.recipe.ingredients}
+            key={recipe.recipe.label}
+             />
+          )): 'Loading...'
+        }
+
+
+
+        {/* { // recipes.map((reci) => (
+          //   <Recipe title={reci.recipe.label}
+          //   calories={reci.recipe.calories}
+          //   image={reci.recipe.image}
+          //   ingres={reci.recipe.ingredients}
+          //   key={reci.recipe.label}/>
+          // )
+            
+          // )} */}
       </div>
 
     </div>
